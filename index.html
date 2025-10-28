@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>一键导入订阅配置</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body { font-family: sans-serif; text-align: center; padding: 20px; }
+        .success-msg { color: green; font-weight: bold; }
+        .fallback { border: 1px solid #ccc; padding: 15px; margin-top: 20px; display: none; }
+        .sub-link { width: 100%; padding: 10px; margin-top: 10px; border: 1px solid #007bff; background-color: #f8f9fa; }
+    </style>
+</head>
+<body>
+
+    <h2>正在尝试自动导入配置...</h2>
+    <p class="success-msg">如果您的 Hiddify App 已安装，应该会立即跳转。</p>
+    <img id="loading-gif" src="https://via.placeholder.com/50/007bff/ffffff?text=Loading" alt="加载中">
+
+    <div id="fallback-instructions" class="fallback">
+        <h3>❗ 自动导入失败，请手动操作：</h3>
+        <p>原因可能是您未安装 Hiddify App 或浏览器拦截了跳转。</p>
+        <p>请点击复制按钮，将订阅地址粘贴到您的 Hiddify 客户端中。</p>
+        
+        <input type="text" id="subscription-url" class="sub-link" readonly>
+        <button onclick="copyToClipboard()" style="padding: 10px 20px; background-color: #007bff; color: white; border: none; cursor: pointer;">
+            复制订阅地址
+        </button>
+        <p id="copy-status" style="color: red; margin-top: 5px;"></p>
+        <p><a href="[您的 Hiddify App 下载链接]" target="_blank">前往下载 Hiddify App</a></p>
+    </div>
+
+    <script>
+        // 1. 获取 URL 中的订阅参数
+        const urlParams = new URLSearchParams(window.location.search);
+        const subscriptionUrl = urlParams.get('sub'); // 获取您在 FB 中发送的 'sub=' 后面的链接
+        
+        if (subscriptionUrl) {
+            // 2. 构造深度链接
+            const deepLink = 'hiddify://install?url=' + encodeURIComponent(subscriptionUrl);
+
+            // 3. 尝试进行深度链接跳转
+            window.location.href = deepLink;
+
+            // 4. 设置一个超时，用于处理跳转失败的情况
+            setTimeout(() => {
+                // 如果 2500 毫秒（2.5 秒）后页面还没有跳转走，则认为跳转失败
+                document.getElementById('loading-gif').style.display = 'none';
+                document.getElementById('subscription-url').value = subscriptionUrl;
+                document.getElementById('fallback-instructions').style.display = 'block';
+            }, 2500);
+
+        } else {
+            document.getElementById('loading-gif').style.display = 'none';
+            document.querySelector('h2').textContent = '链接错误，请联系客服获取正确的订阅链接。';
+        }
+
+        // 复制功能
+        function copyToClipboard() {
+            const copyText = document.getElementById("subscription-url");
+            copyText.select();
+            copyText.setSelectionRange(0, 99999); // 针对移动设备
+            try {
+                document.execCommand("copy");
+                document.getElementById('copy-status').textContent = "✅ 复制成功！";
+            } catch (err) {
+                document.getElementById('copy-status').textContent = "⚠️ 复制失败，请手动长按复制。";
+            }
+        }
+    </script>
+</body>
+</html>
