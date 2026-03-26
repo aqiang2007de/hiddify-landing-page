@@ -25,6 +25,8 @@ body {
     border-radius: 6px;
     margin: 10px;
     font-size: 16px;
+    display: inline-block;
+    text-decoration: none;
 }
 .button:active {
     opacity: 0.8;
@@ -39,14 +41,33 @@ body {
 <p>👇 Click button to connect or copy key manually</p>
 
 <div id="manual" style="display:none;">
+    
     <div class="copy-box" id="keyBox"></div>
 
     <button class="button" onclick="openOutline()">🚀 Open Outline</button>
     <button class="button" onclick="copyKey()">📋 Copy Key</button>
 
-    <br>
+    <!-- 下载区域 -->
+    <div style="margin-top:30px;">
+        <p><strong>📥 Download Outline (If not installed)</strong></p>
 
-    <a href="https://getoutline.org" target="_blank">Download Outline</a>
+        <a href="https://apps.apple.com/app/outline-app/id1356177741" target="_blank" class="button">
+            🍎 Apple (iPhone / iPad)
+        </a>
+
+        <br>
+
+        <a href="https://play.google.com/store/apps/details?id=org.outline.android.client" target="_blank" class="button">
+            🤖 Android
+        </a>
+
+        <br>
+
+        <a href="https://getoutline.org/en/home" target="_blank" class="button">
+            💻 Windows / Mac
+        </a>
+    </div>
+
 </div>
 
 <script>
@@ -61,16 +82,18 @@ if (key) {
     document.getElementById('manual').style.display = 'block';
     document.getElementById('keyBox').textContent = key;
 
-    // 自动复制（兼容方案）
+    // 自动复制
     autoCopy(key);
 
 } else {
+
     document.getElementById('manual').style.display = 'block';
     document.getElementById('keyBox').textContent = "No key provided";
+
 }
 
 
-// 打开 Outline（手动触发）
+// 打开 Outline（手动点击）
 function openOutline() {
     const key = document.getElementById('keyBox').textContent;
 
@@ -89,7 +112,7 @@ function copyKey() {
 }
 
 
-// 自动复制（增强兼容）
+// 自动复制（兼容）
 function autoCopy(text) {
 
     if (navigator.clipboard) {
