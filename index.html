@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Outline Import</title>
+<title>Outline Connect</title>
 
 <style>
 body {
@@ -26,14 +26,17 @@ body {
     margin: 10px;
     font-size: 16px;
 }
+.button:active {
+    opacity: 0.8;
+}
 </style>
 </head>
 
 <body>
 
-<h2>🚀 Connecting to Outline...</h2>
+<h2>🚀 Connect to Outline</h2>
 
-<p>If not working, click button below</p>
+<p>👇 Click button to connect or copy key manually</p>
 
 <div id="manual" style="display:none;">
     <div class="copy-box" id="keyBox"></div>
@@ -48,25 +51,18 @@ body {
 
 <script>
 
+// 获取参数
 const params = new URLSearchParams(window.location.search);
-const key = params.get('sub'); // 这里就是 ss://
+const key = params.get('sub');
 
 if (key) {
 
-    // 1️⃣ 自动复制
-    navigator.clipboard.writeText(key).catch(() => {});
+    // 显示密钥
+    document.getElementById('manual').style.display = 'block';
+    document.getElementById('keyBox').textContent = key;
 
-    // 2️⃣ 尝试打开 Outline（安卓）
-    const intent = "intent://" + key.replace("ss://", "") +
-        "#Intent;scheme=ss;package=org.outline.android.client;end";
-
-    window.location.href = intent;
-
-    // 3️⃣ fallback
-    setTimeout(() => {
-        document.getElementById('manual').style.display = 'block';
-        document.getElementById('keyBox').textContent = key;
-    }, 1500);
+    // 自动复制（兼容方案）
+    autoCopy(key);
 
 } else {
     document.getElementById('manual').style.display = 'block';
@@ -74,7 +70,7 @@ if (key) {
 }
 
 
-// 手动打开
+// 打开 Outline（手动触发）
 function openOutline() {
     const key = document.getElementById('keyBox').textContent;
 
@@ -84,13 +80,34 @@ function openOutline() {
     window.location.href = intent;
 }
 
-// 复制
+
+// 手动复制
 function copyKey() {
     const key = document.getElementById('keyBox').textContent;
+    autoCopy(key);
+    alert("Copied!");
+}
 
-    navigator.clipboard.writeText(key).then(() => {
-        alert("Copied!");
-    });
+
+// 自动复制（增强兼容）
+function autoCopy(text) {
+
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(text).catch(() => fallbackCopy(text));
+    } else {
+        fallbackCopy(text);
+    }
+}
+
+
+// 兼容旧浏览器
+function fallbackCopy(text) {
+    const textarea = document.createElement("textarea");
+    textarea.value = text;
+    document.body.appendChild(textarea);
+    textarea.select();
+    document.execCommand("copy");
+    document.body.removeChild(textarea);
 }
 
 </script>
