@@ -7,15 +7,10 @@
 
 <style>
 body {
-    font-family: Arial;
+    font-family: Arial, sans-serif;
     text-align: center;
     padding: 20px;
-}
-.copy-box {
-    background: #f7f7f7;
-    padding: 15px;
-    margin: 20px 0;
-    word-break: break-all;
+    background-color: #ffffff;
 }
 .button {
     background: #007bff;
@@ -27,9 +22,16 @@ body {
     font-size: 16px;
     display: inline-block;
     text-decoration: none;
+    cursor: pointer;
+    font-weight: bold;
 }
 .button:active {
     opacity: 0.8;
+}
+.download-section {
+    margin-top: 40px;
+    border-top: 1px dashed #ccc;
+    padding-top: 20px;
 }
 </style>
 </head>
@@ -37,102 +39,96 @@ body {
 <body>
 
 <h2>🚀 Connect to Outline</h2>
-
 <p>👇 Click button to connect or copy key manually</p>
 
-<div id="manual" style="display:none;">
-    
-    <div class="copy-box" id="keyBox"></div>
-
+<div id="actionArea">
     <button class="button" onclick="openOutline()">🚀 Open Outline</button>
     <button class="button" onclick="copyKey()">📋 Copy Key</button>
+</div>
 
-    <!-- 下载区域 -->
-    <div style="margin-top:30px;">
-        <p><strong>📥 Download Outline (If not installed)</strong></p>
+<div class="download-section">
+    <p><strong>📥 Download Outline (If not installed)</strong></p>
 
-        <a href="https://apps.apple.com/app/outline-app/id1356177741" target="_blank" class="button">
-            🍎 Apple (iPhone / iPad / Mac)
-        </a>
-
-        <br>
-
-        <a href="https://play.google.com/store/apps/details?id=org.outline.android.client" target="_blank" class="button">
-            🤖 Android
-        </a>
-
-        <br>
-
-        <a href="https://s3.amazonaws.com/outline-releases/client/windows/stable/Outline-Client.exe" target="_blank" class="button">
-            💻 Windows
-        </a>
-    </div>
-
+    <a href="https://apps.apple.com/app/outline-app/id1356177741" target="_blank" class="button">
+        🍎 Apple (iPhone / iPad / Mac)
+    </a>
+    <br>
+    <a href="https://play.google.com/store/apps/details?id=org.outline.android.client" target="_blank" class="button">
+        🤖 Android
+    </a>
+    <br>
+    <a href="https://s3.amazonaws.com/outline-releases/client/windows/stable/Outline-Client.exe" target="_blank" class="button">
+        💻 Windows
+    </a>
 </div>
 
 <script>
+// 全局存储密钥
+let accessKey = "";
 
-// 获取参数
+// 获取网址参数
 const params = new URLSearchParams(window.location.search);
-const key = params.get('sub');
+accessKey = params.get('sub');
 
-if (key) {
-
-    // 显示密钥
-    document.getElementById('manual').style.display = 'block';
-    document.getElementById('keyBox').textContent = key;
-
-    // 自动复制
-    autoCopy(key);
-
+// 初始检查
+if (!accessKey) {
+    alert("Warning: No access key provided in the URL.");
 } else {
-
-    document.getElementById('manual').style.display = 'block';
-    document.getElementById('keyBox').textContent = "No key provided";
-
+    // 自动执行一次复制，提高用户体验
+    autoCopy(accessKey);
 }
 
-
-// 打开 Outline（手动点击）
+// 打开 Outline
 function openOutline() {
-    const key = document.getElementById('keyBox').textContent;
-
-    const intent = "intent://" + key.replace("ss://", "") +
-        "#Intent;scheme=ss;package=org.outline.android.client;end";
-
-    window.location.href = intent;
+    if (!accessKey) {
+        alert("No key to open!");
+        return;
+    }
+    
+    // 如果是 ss:// 格式，使用 intent 协议尝试唤起 Android 客户端
+    // 如果是 ssconf:// 格式，直接跳转即可
+    if (accessKey.startsWith("ss://")) {
+        const intent = "intent://" + accessKey.replace("ss://", "") +
+            "#Intent;scheme=ss;package=org.outline.android.client;end";
+        window.location.href = intent;
+    } else {
+        window.location.href = accessKey;
+    }
 }
 
-
-// 手动复制
+// 手动点击按钮复制
 function copyKey() {
-    const key = document.getElementById('keyBox').textContent;
-    autoCopy(key);
-    alert("Copied!");
+    if (!accessKey) {
+        alert("No key to copy!");
+        return;
+    }
+    autoCopy(accessKey);
+    alert("Key Copied Successfully!");
 }
 
-
-// 自动复制（兼容）
+// 自动复制核心函数
 function autoCopy(text) {
-
-    if (navigator.clipboard) {
+    if (navigator.clipboard && window.isSecureContext) {
         navigator.clipboard.writeText(text).catch(() => fallbackCopy(text));
     } else {
         fallbackCopy(text);
     }
 }
 
-
-// 兼容旧浏览器
+// 兼容性复制方案
 function fallbackCopy(text) {
     const textarea = document.createElement("textarea");
     textarea.value = text;
+    textarea.style.position = "fixed";  // 防止页面滚动
     document.body.appendChild(textarea);
     textarea.select();
-    document.execCommand("copy");
+    try {
+        document.execCommand("copy");
+    } catch (err) {
+        console.error("Copy failed", err);
+    }
     document.body.removeChild(textarea);
 }
-
 </script>
 
 </body>
